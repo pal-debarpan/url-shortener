@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
-from app.schemas import URLCreate, URLResponse
+from app.schemas import URLCreate, URLResponse, URLStatsResponse
 from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code
 from app.models import URL
 
@@ -81,3 +81,21 @@ def get_url_info(
         "short_url": short_url,
         "click_count": url.click_count
     }
+
+@api_router.get(
+    "/urls/{short_code}/stats",
+    response_model=URLStatsResponse
+)
+def get_url_stats(
+    short_code: str,
+    db: Session = Depends(get_db)
+):
+    url = get_url_short_code(db, short_code)
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Short URL not found"
+        )
+
+    return url

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, HttpUrl, Field
+from datetime import datetime
 
 
 class URLCreate(BaseModel):
@@ -18,6 +19,16 @@ class URLResponse(BaseModel):
     short_code: str
     short_url: str
     click_count: int
+
+    class Config:
+        from_attributes = True
+
+class URLStatsResponse(BaseModel):
+    id: int
+    original_url: str
+    short_code: str
+    click_count: int
+    created_at: datetime
 
     class Config:
         from_attributes = True
