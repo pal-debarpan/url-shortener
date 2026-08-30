@@ -17,10 +17,17 @@ def create_url(
     url_data: URLCreate,
     db: Session = Depends(get_db)
 ):
-    new_url = create_short_url(
-        db,
-        str(url_data.original_url)
-    )
+    try:
+        new_url = create_short_url(
+            db,
+            str(url_data.original_url),
+            url_data.custom_alias
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=409,
+            detail=str(e)
+        )
 
     short_url = str(request.base_url) + new_url.short_code
     return {
