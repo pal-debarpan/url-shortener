@@ -21,7 +21,15 @@ def create_url(
     url_data: URLCreate,
     db: Session = Depends(get_db)
 ):
-    short_code = generate_short_code()
+    while True:
+        short_code = generate_short_code()
+
+        existing_url = (
+            db.query(URL).filter(URL.short_code == short_code).first()
+        )
+
+        if not existing_url:
+            break
 
     new_url = URL(
         original_url=str(url_data.original_url),
