@@ -42,3 +42,11 @@ def get_url_increment_clicks(
     db.commit()
 
     return url
+
+def get_url_short_code(
+        db: Session,
+        short_code: str
+) -> Optional[URL]:
+    return (
+        db.query(URL).filter(URL.short_code == short_code).first()
+    )

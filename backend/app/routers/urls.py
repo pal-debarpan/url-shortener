@@ -1,27 +1,38 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.schemas import URLCreate, URLResponse
-from app.services.url_service import create_short_url, get_url_increment_clicks
+from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code
 from app.models import URL
 
-router = APIRouter()
+api_router = APIRouter(prefix="/api/v1")
+redirect_router = APIRouter()
 
 
-@router.post("/api/v1/urls", response_model=URLResponse)
+@api_router.post("/urls", response_model=URLResponse)
 def create_url(
+    request: Request,
     url_data: URLCreate,
     db: Session = Depends(get_db)
 ):
-    return create_short_url(
+    new_url = create_short_url(
         db,
         str(url_data.original_url)
     )
 
+    short_url = str(request.base_url) + new_url.short_code
+    return {
+        "id": new_url.id,
+        "original_url": new_url.original_url,
+        "short_code": new_url.short_code,
+        "short_url": short_url,
+        "click_count": new_url.click_count
+    }
+    
 
-@router.get("/{short_code}")
+@redirect_router.get("/{short_code}")
 def redirect_to_original(
     short_code: str,
     db: Session = Depends(get_db)
@@ -39,3 +50,27 @@ def redirect_to_original(
         url=url.original_url,
         status_code=307
     )
+
+@api_router.get("/urls/{short_code}", response_model=URLResponse)
+def get_url_info(
+    short_code: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    url = get_url_short_code(db, short_code)
+
+    if not url:
+        raise HTTPException(
+            status_code=404,
+            detail="Short URL not found"
+        )
+
+    short_url = str(request.base_url) + short_code
+
+    return {
+        "id": url.id,
+        "original_url": url.original_url,
+        "short_code": url.short_code,
+        "short_url": short_url,
+        "click_count": url.click_count
+    }
