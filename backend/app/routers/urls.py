@@ -3,10 +3,9 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
-from app.models import URL
 from app.schemas import URLCreate, URLResponse
-from app.utils import generate_short_code
-
+from app.services.url_service import create_short_url, get_url_increment_clicks
+from app.models import URL
 
 router = APIRouter()
 
@@ -16,28 +15,10 @@ def create_url(
     url_data: URLCreate,
     db: Session = Depends(get_db)
 ):
-    while True:
-        short_code = generate_short_code()
-
-        existing_url = (
-            db.query(URL)
-            .filter(URL.short_code == short_code)
-            .first()
-        )
-
-        if not existing_url:
-            break
-
-    new_url = URL(
-        original_url=str(url_data.original_url),
-        short_code=short_code
+    return create_short_url(
+        db,
+        str(url_data.original_url)
     )
-
-    db.add(new_url)
-    db.commit()
-    db.refresh(new_url)
-
-    return new_url
 
 
 @router.get("/{short_code}")
@@ -45,20 +26,14 @@ def redirect_to_original(
     short_code: str,
     db: Session = Depends(get_db)
 ):
-    url = (
-        db.query(URL)
-        .filter(URL.short_code == short_code)
-        .first()
-    )
+    url = get_url_increment_clicks(db, short_code)
+
 
     if not url:
         raise HTTPException(
             status_code=404,
             detail="Short URL not found"
         )
-
-    url.click_count += 1
-    db.commit()
 
     return RedirectResponse(
         url=url.original_url,
