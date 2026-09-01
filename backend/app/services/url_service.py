@@ -64,3 +64,19 @@ def get_url_short_code(
     return (
         db.query(URL).filter(URL.short_code == short_code).first()
     )
+
+def delete_url(
+        db: Session,
+        short_code: str
+) -> bool:
+    url = (
+        db.query(URL).filter(URL.short_code == short_code).first()
+    )
+
+    if not url:
+        return False
+
+    db.delete(url)
+    db.commit()
+
+    return True

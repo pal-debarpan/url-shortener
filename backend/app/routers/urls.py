@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.schemas import URLCreate, URLResponse, URLStatsResponse
-from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code
+from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code, delete_url
 from app.models import URL
 
 api_router = APIRouter(prefix="/api/v1")
@@ -99,3 +99,20 @@ def get_url_stats(
         )
 
     return url
+
+@api_router.delete("/urls/{short_code}")
+def delete_short_url(
+    short_code: str,
+    db: Session = Depends(get_db)
+):
+    deleted = delete_url(db, short_code)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Short URL not found"
+        )
+
+    return {
+        "message": "Short URL deleted succesfully"
+    }
