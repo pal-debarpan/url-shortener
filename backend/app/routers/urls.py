@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
-from app.schemas import URLCreate, URLResponse, URLStatsResponse
+from app.schemas.url import URLCreate, URLResponse, URLStatsResponse
 from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code, delete_url
 from app.models import URL
 
