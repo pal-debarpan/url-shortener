@@ -5,7 +5,7 @@ from app.utils import generate_short_code
 
 from typing import Optional
 
-def create_short_url(db: Session, original_url: str, custom_alias: Optional[str] = None) -> URL:
+def create_short_url(db: Session, original_url: str, custom_alias: Optional[str] = None, user_id: int = None) -> URL:
 
     if custom_alias:
         existing_url = (
@@ -32,7 +32,8 @@ def create_short_url(db: Session, original_url: str, custom_alias: Optional[str]
 
     new_url = URL(
         original_url=original_url,
-        short_code=short_code
+        short_code=short_code,
+        user_id=user_id
     )
 
     db.add(new_url)
@@ -64,6 +65,16 @@ def get_url_short_code(
     return (
         db.query(URL).filter(URL.short_code == short_code).first()
     )
+
+
+def get_user_urls(
+        db: Session,
+        user_id: int
+) -> list[URL]:
+    return (
+        db.query(URL).filter(URL.user_id == user_id).all()
+    )
+
 
 def delete_url(
         db: Session,

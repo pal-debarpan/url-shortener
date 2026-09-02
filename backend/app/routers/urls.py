@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_current_user_id
 from app.schemas.url import URLCreate, URLResponse, URLStatsResponse
-from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code, delete_url
+from app.services.url_service import create_short_url, get_url_increment_clicks, get_url_short_code, delete_url, get_user_urls
 from app.models import URL
 
 api_router = APIRouter(prefix="/api/v1")
@@ -15,13 +15,15 @@ redirect_router = APIRouter()
 def create_url(
     request: Request,
     url_data: URLCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
 ):
     try:
         new_url = create_short_url(
             db,
             str(url_data.original_url),
-            url_data.custom_alias
+            url_data.custom_alias,
+            current_user_id
         )
     except ValueError as e:
         raise HTTPException(
@@ -37,6 +39,30 @@ def create_url(
         "short_url": short_url,
         "click_count": new_url.click_count
     }
+
+
+@api_router.get("/urls", response_model=list[URLResponse])
+def get_my_urls(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
+):
+    urls = get_user_urls(db, current_user_id)
+
+    result = []
+
+    for url in urls:
+        short_url = str(request.base_url) + url.short_code
+
+        result.append({
+            "id": url.id,
+            "original_url": url.original_url,
+            "short_code": url.short_code,
+            "short_url": short_url,
+            "click_count": url.click_count
+        })
+
+    return result
     
 
 @redirect_router.get("/{short_code}")
@@ -62,7 +88,8 @@ def redirect_to_original(
 def get_url_info(
     short_code: str,
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
 ):
     url = get_url_short_code(db, short_code)
 
@@ -70,6 +97,12 @@ def get_url_info(
         raise HTTPException(
             status_code=404,
             detail="Short URL not found"
+        )
+
+    if url.user_id != current_user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this URL"
         )
 
     short_url = str(request.base_url) + short_code
@@ -88,7 +121,8 @@ def get_url_info(
 )
 def get_url_stats(
     short_code: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
 ):
     url = get_url_short_code(db, short_code)
 
@@ -98,20 +132,36 @@ def get_url_stats(
             detail="Short URL not found"
         )
 
+    if url.user_id != current_user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this URL"
+        )
+
     return url
 
 @api_router.delete("/urls/{short_code}")
 def delete_short_url(
     short_code: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user_id)
 ):
-    deleted = delete_url(db, short_code)
+    url = get_url_short_code(db, short_code)
 
-    if not deleted:
+    if not url:
         raise HTTPException(
             status_code=404,
             detail="Short URL not found"
         )
+
+    if url.user_id != current_user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to delete this URL"
+        )
+
+    db.delete(url)
+    db.commit()
 
     return {
         "message": "Short URL deleted succesfully"

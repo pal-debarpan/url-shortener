@@ -14,18 +14,18 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    urls = relationship("URL", back_populates="user")
+    urls = relationship("URL", back_populates="user", cascade="all, delete-orphan")
 
 
 class URL(Base):
     __tablename__ = "urls"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True)
     original_url = Column(String, nullable=False)
     short_code = Column(String, unique=True, nullable=False, index=True)
     click_count = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True, index=True)
 
     user = relationship("User", back_populates="urls")
