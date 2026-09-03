@@ -10,6 +10,7 @@ frontend/.env.*
 
 # Node
 frontend/node_modules/
+node_modules/
 
 # Build output
 frontend/dist/
