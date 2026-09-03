@@ -62,10 +62,22 @@ def login(
         "token_type": "bearer"
     }
 
+from app.models import User
+
 @router.get("/me")
 def get_me(
-    current_user_id: int = Depends(get_current_user_id)
+    current_user_id: int = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
 ):
+    user = db.query(User).filter(User.id == current_user_id).first()
+    if not user:
+        return {
+            "id": current_user_id,
+            "user_id": current_user_id
+        }
     return {
-        "user_id": current_user_id
+        "id": user.id,
+        "user_id": user.id,
+        "email": user.email,
+        "created_at": user.created_at
     }

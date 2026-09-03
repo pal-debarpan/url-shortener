@@ -31,7 +31,7 @@ def create_url(
             detail=str(e)
         )
 
-    short_url = str(request.base_url) + new_url.short_code
+    short_url = str(request.base_url) + "r/" + new_url.short_code
     return {
         "id": new_url.id,
         "original_url": new_url.original_url,
@@ -52,7 +52,7 @@ def get_my_urls(
     result = []
 
     for url in urls:
-        short_url = str(request.base_url) + url.short_code
+        short_url = str(request.base_url) + "r/" + url.short_code
 
         result.append({
             "id": url.id,
@@ -65,7 +65,7 @@ def get_my_urls(
     return result
     
 
-@redirect_router.get("/{short_code}")
+@redirect_router.get("/r/{short_code}")
 def redirect_to_original(
     short_code: str,
     db: Session = Depends(get_db)
@@ -105,7 +105,7 @@ def get_url_info(
             detail="You do not have permission to access this URL"
         )
 
-    short_url = str(request.base_url) + short_code
+    short_url = str(request.base_url) + "r/" + short_code
 
     return {
         "id": url.id,
