@@ -11,7 +11,12 @@ export const AuthCallbackPage = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        if (!supabase) {
+          throw new Error('Supabase client is not configured. Please set VITE_SUPABASE_ANON_KEY in frontend/.env.');
+        }
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
         
         if (sessionError) throw sessionError;
 

@@ -3,9 +3,15 @@ from datetime import datetime, timedelta, timezone
 
 from jose import jwt
 from passlib.context import CryptContext
+from pathlib import Path
 from dotenv import load_dotenv
 
+# Load environment variables from backend/.env relative to security.py location
+backend_env = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(dotenv_path=backend_env)
 load_dotenv()
+
+
 
 pwd_context = CryptContext(
     schemes=['bcrypt'],
