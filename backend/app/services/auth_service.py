@@ -25,5 +25,15 @@ def create_user(db: Session, email: str, password: str) -> User:
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-
     return new_user
+
+import secrets
+
+def get_or_create_oauth_user(db: Session, email: str) -> User:
+    user = get_user_by_email(db, email)
+    if user:
+        return user
+
+    random_password = secrets.token_urlsafe(32)
+    return create_user(db, email, random_password)
+

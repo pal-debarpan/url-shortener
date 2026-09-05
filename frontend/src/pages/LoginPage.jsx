@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatErrorMessage } from '../services/api';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
+
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -64,7 +66,20 @@ export const LoginPage = () => {
               </div>
             )}
 
+            {/* Google OAuth Button */}
+            <div className="mb-md">
+              <GoogleSignInButton label="Continue with Google" onError={(msg) => setError(msg)} />
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-sm mb-md">
+              <div className="flex-grow h-px bg-outline-variant/40"></div>
+              <span className="font-caption text-caption text-outline-variant uppercase">Or with email</span>
+              <div className="flex-grow h-px bg-outline-variant/40"></div>
+            </div>
+
             <form onSubmit={handleSubmit} className="flex flex-col gap-md">
+
               {/* Email Input */}
               <div className="flex flex-col gap-base">
                 <label className="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-[11px]" htmlFor="login-email">
@@ -132,15 +147,9 @@ export const LoginPage = () => {
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="flex items-center gap-sm my-md">
-              <div className="flex-grow h-px bg-outline-variant/40"></div>
-              <span className="font-caption text-caption text-outline-variant">OR</span>
-              <div className="flex-grow h-px bg-outline-variant/40"></div>
-            </div>
-
             {/* Secondary Action */}
-            <div className="text-center">
+            <div className="text-center mt-md">
+
               <p className="font-body-md text-body-md text-on-surface-variant">
                 Don't have an account?{' '}
                 <Link

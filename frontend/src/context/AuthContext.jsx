@@ -45,6 +45,21 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
+  const loginWithSupabase = async (supabaseUserData) => {
+    const data = await supabaseLogin({
+      email: supabaseUserData.email,
+      supabase_uid: supabaseUserData.id,
+    });
+    const accessToken = data.access_token;
+    localStorage.setItem('urlshawtie_token', accessToken);
+    setToken(accessToken);
+
+    const userData = await getCurrentUser();
+    setUser(userData);
+    localStorage.setItem('urlshawtie_user', JSON.stringify(userData));
+    return userData;
+  };
+
   const signup = async (userData) => {
     const registered = await registerUser(userData);
     // After signup, automatically login
@@ -67,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     isAuthenticated: !!token && !!user,
     login,
+    loginWithSupabase,
     signup,
     logout,
     setUser,

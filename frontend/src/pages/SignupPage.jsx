@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatErrorMessage } from '../services/api';
+import { GoogleSignInButton } from '../components/GoogleSignInButton';
+
 
 export const SignupPage = () => {
   const [email, setEmail] = useState('');
@@ -68,6 +70,18 @@ export const SignupPage = () => {
                 <span>{error}</span>
               </div>
             )}
+
+            {/* Google OAuth Button */}
+            <div className="mb-md">
+              <GoogleSignInButton label="Sign up with Google" onError={(msg) => setError(msg)} />
+            </div>
+
+            {/* Divider */}
+            <div className="flex items-center gap-sm mb-md">
+              <div className="flex-grow h-px bg-outline-variant/40"></div>
+              <span className="font-caption text-caption text-outline-variant uppercase">Or with email</span>
+              <div className="flex-grow h-px bg-outline-variant/40"></div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-md">
               {/* Email Field */}

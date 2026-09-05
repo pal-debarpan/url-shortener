@@ -107,7 +107,16 @@ export const loginUser = async ({ email, password }) => {
   return response.data;
 };
 
+export const supabaseLogin = async ({ email, supabase_uid }) => {
+  const response = await apiClient.post('/api/v1/auth/supabase-login', {
+    email,
+    supabase_uid,
+  });
+  return response.data;
+};
+
 export const getCurrentUser = async () => {
+
   const response = await apiClient.get('/api/v1/auth/me');
   return response.data;
 };

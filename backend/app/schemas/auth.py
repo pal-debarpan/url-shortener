@@ -18,3 +18,7 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
+
+class SupabaseOAuthLogin(BaseModel):
+    email: EmailStr
+    supabase_uid: str | None = None
