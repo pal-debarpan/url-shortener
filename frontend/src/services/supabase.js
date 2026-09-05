@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://czpsmpprjiubqjxibpmx.supabase.co';
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+const DEFAULT_SUPABASE_URL = 'https://czpsmpprjiubqjxibpmx.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6cHNtcHByaml1YnFqeGlicG14Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MTQ3ODMsImV4cCI6MjEwMzQ5MDc4M30.UCtfY50PtkmCw21130qParUW0E4eAYKsmUzAeqOieVk';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY).trim();
 
 const isPlaceholderKey = !supabaseAnonKey || 
   supabaseAnonKey === 'your_supabase_anon_key_here' || 
